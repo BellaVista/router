@@ -33,7 +33,7 @@ func sayHello(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     // Create route
-    r := New("/")
+    r := router.New("/")
     r.Add("/hello/:name", http.HandlerFunc(sayHello))
     
     s := &http.Server{
