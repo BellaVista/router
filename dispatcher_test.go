@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 )
 
@@ -41,5 +42,24 @@ func TestDispatcherParam(t *testing.T) {
 
 	if req.Context().Value(Param("name")).(string) != "joe" {
 		t.Error("Request should have the :name context param set to 'joe' after dispatch")
+	}
+}
+
+func TestConcurrentDispatch(t *testing.T) {
+	r := New("/test")
+	r.Add("/one/:param", http.HandlerFunc(dhandler))
+	r.Add("/two/:param", http.HandlerFunc(dhandler))
+
+	d := Route(r)
+
+	for i := 0; i < 1000; i++ {
+		res1 := httptest.NewRecorder()
+		res2 := httptest.NewRecorder()
+
+		one, _ := http.NewRequest("GET", "http://localhost:8080/test/one/"+strconv.Itoa(i), nil)
+		two, _ := http.NewRequest("GET", "http://localhost:8080/test/two/"+strconv.Itoa(i), nil)
+
+		go d.ServeHTTP(res1, one)
+		go d.ServeHTTP(res2, two)
 	}
 }
