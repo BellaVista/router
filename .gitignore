@@ -1,3 +1,7 @@
+# Eclipse garbage
+.project
+.settings
+
 # Binaries for programs and plugins
 *.exe
 *.dll
