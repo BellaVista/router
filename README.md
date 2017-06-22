@@ -7,7 +7,7 @@
 
 # Bella Vista Router
 
-**Idiomatic, ultra-fast, simple, net/http compatible, context compatible, http router for Go**
+**Pure Go's stdlib, idiomatic, ultra-fast, simple, net/http compatible, context compatible, http router/mux**
 
 Your existent http.Handler works with NO CHANGES with this package. And now they can get route parameters!
 The parameters are stored on the new Context object inside http.Request since Go 1.7. 
