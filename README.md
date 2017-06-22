@@ -1,7 +1,7 @@
 [![GoDoc](https://godoc.org/github.com/bellavista/router?status.svg)](https://godoc.org/github.com/bellavista/router)
 [![Version](https://badge.fury.io/gh/bellavista%2Frouter.svg)](https://badge.fury.io/gh/bellavista%2Frouter)
 [![Build Status](https://travis-ci.org/bellavista/router.svg?branch=master)](https://travis-ci.org/bellavista/router)
-[![Coverage Status](https://coveralls.io/repos/github/bellavista/router/badge.svg?branch=master)](https://coveralls.io/github/bellavista/router?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/BellaVista/router/badge.svg?branch=master)](https://coveralls.io/github/BellaVista/router?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bellavista/router)](https://goreportcard.com/report/github.com/bellavista/router)
 
 
