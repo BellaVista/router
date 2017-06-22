@@ -9,7 +9,7 @@ import (
 // to be able to match and execute requests.
 type Router interface {
 	// Add takes a route path and a handler to store for further matching
-	Add(path string, hanlder http.Handler)
+	Add(path string, handler http.Handler)
 
 	// Match checks if a request matches this router.
 	// If so, adds the route parameters to the request and returns the corresponding handler

@@ -152,12 +152,12 @@ func (n *node) matchChild(parts []string, r *http.Request) http.Handler {
 		// Last one
 		if len(parts) == 1 {
 			return ch.handler
-		} else {
-			// Go deeper
-			h := ch.matchChild(parts[1:], r)
-			if h != nil {
-				return h
-			}
+		}
+
+		// Go deeper
+		h := ch.matchChild(parts[1:], r)
+		if h != nil {
+			return h
 		}
 	}
 

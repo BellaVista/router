@@ -19,9 +19,9 @@ func GetString(req *http.Request, key string) string {
 	v := GetParam(req, key)
 	if v != nil {
 		return v.(string)
-	} else {
-		return ""
 	}
+
+	return ""
 }
 
 // GetInt wraps GetParam and returns the value as a int type.
