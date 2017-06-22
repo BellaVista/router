@@ -28,7 +28,7 @@ import (
 )
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello " + router.GetString("name")))
+    w.Write([]byte("Hello " + router.GetString(r, "name")))
 }
 
 func main() {
