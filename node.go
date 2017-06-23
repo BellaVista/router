@@ -67,7 +67,7 @@ func (n *node) walk(route string) (*node, string) {
 	route = cleanupRoute(route)
 
 	// Loop through route parts
-	for i, _ := range route {
+	for i := range route {
 		if route[i] != '/' && i != len(route) {
 			continue
 		}
@@ -128,7 +128,7 @@ func (n *node) matchChild(part string, r *http.Request) http.Handler {
 	}
 
 	// Split parts
-	for i, _ := range part {
+	for i := range part {
 		if part[i] != '/' && len(part) != (i+1) {
 			continue
 		}
@@ -147,19 +147,19 @@ func (n *node) matchChild(part string, r *http.Request) http.Handler {
 							part[:i+1]))
 
 					return ch.handler
-				} else {
-					// Go deeper
-					h := ch.matchChild(part[i+1:], r)
-					if h != nil {
-						// Set param
-						*r = *r.WithContext(
-							context.WithValue(
-								r.Context(),
-								Param(ch.path[1:]),
-								part[:i]))
+				}
 
-						return h
-					}
+				// Go deeper
+				h := ch.matchChild(part[i+1:], r)
+				if h != nil {
+					// Set param
+					*r = *r.WithContext(
+						context.WithValue(
+							r.Context(),
+							Param(ch.path[1:]),
+							part[:i]))
+
+					return h
 				}
 			}
 
