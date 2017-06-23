@@ -23,7 +23,6 @@ The parameters are stored on the new Context object inside http.Request since Go
 ```go
 import (
     "github.com/bellavista/router"
-    "log"
     "net/http"
 )
 
@@ -41,7 +40,138 @@ func main() {
         Handler:        router.Route(r),
     }
     
-    log.Fatal(s.ListenAndServe())
+    s.ListenAndServe()
 }
 ```
+
+
+## Handlers
+
+Your handlers are plain simply Go's stdlib [http.Handler](https://golang.org/pkg/net/http/#Handler) objects. 
+
+
+```go
+
+import "net/http"
+
+type MyHandler struct {}
+
+func (mh MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("Hello world!")
+}
+
+```
+
+
+And, if you're used to use the [http.HandleFunc](https://golang.org/pkg/net/http/#HandleFunc) approach, 
+you're still covered by the `net/http` package with [http.HandlerFunc](https://golang.org/pkg/net/http/#HandlerFunc). 
+
+```go
+
+import "net/http"
+
+func MyHandlerFunc(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("Hello world!")
+}
+
+h := http.HandlerFunc(MyHandlerFunc)
+
+```
+
+No surprises, no changes in the function signature when you want to receive route parameters, nothing. 
+
+
+## Routes definition
+
+Routes are handled by a router object that can group several routes under a single prefix. 
+Then, multiple routers can join into a single dispatcher that acts as a replacement for `http.Server.Handler`.
+
+
+```go
+
+import (
+    "github.com/bellavista/router"
+    "net/http"
+)
+
+func sayHello(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("Hello " + router.GetString(r, "name")))
+}
+
+func main() {
+    // Create first router for routes starting at `/v1`
+    r1 := router.New("/v1")
+    r1.Add("/hello/:name", http.HandlerFunc(sayHello))
+    
+    // Create second router for routes starting at `/v2`
+    r2 := router.New("/v2")
+    r2.Add("/hello/:name", http.HandlerFunc(sayHello))
+    
+    // Create http.Server and dispatch both routers
+    s := &http.Server{
+        Addr:           ":8080",
+        Handler:        router.Route(r1, r2), // router.Route creates the dispatcher object 
+    }
+    
+    s.ListenAndServe()
+}
+
+```
+
+
+## Route parameters
+
+Since Go 1.7, the [context](https://golang.org/pkg/context) package is included on the stdlib, and with it, 
+the http.Request object now has a Context included on its definition that allow us to pass context related values (just like our parameters) 
+across the life of our request.
+Bella Vista Router uses this new feature to keep it compatible with existent (and future) net/http handlers. 
+
+Your routes can hold parameters by defining a route part starting with `:`.
+So, if you want to receive a parameter called `id` at the end of your `/user` route, you can define and consume as follows
+
+
+```go
+
+import (
+    "github.com/bellavista/router"
+    "net/http"
+)
+
+func getUser(w http.ResponseWriter, r *http.Request) {
+    id, err := router.GetInt(r, "id")
+    if err != nil {
+        // There was an error obtaining an integer value from the :id route parameter
+        // ...
+    }
+    
+    // id now holds a value of type int received from the :id route parameter
+    //...
+}
+
+func main() {
+    // Create route
+    r := router.New("/")
+    r.Add("/user/:id", http.HandlerFunc(getUser))
+    
+    s := &http.Server{
+        Addr:           ":8080",
+        Handler:        router.Route(r),
+    }
+    
+    s.ListenAndServe()
+}
+
+```
+
+You can get the raw parameters, a parameter as a string, or other native types using the helper functions from the package. 
+
+Check the docs for: 
+
+- [GetParam](https://godoc.org/github.com/BellaVista/router#GetParam)
+- [GetString](https://godoc.org/github.com/BellaVista/router#GetParam)
+- [GetInt](https://godoc.org/github.com/BellaVista/router#GetInt)
+- [GetInt64](https://godoc.org/github.com/BellaVista/router#GetInt64)
+- [GetUint64](https://godoc.org/github.com/BellaVista/router#GetUint64)
+- [GetFloat64](https://godoc.org/github.com/BellaVista/router#GetFloat64)
+- [GetBool](https://godoc.org/github.com/BellaVista/router#GetBool)
 

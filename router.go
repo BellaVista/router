@@ -12,7 +12,7 @@ type Router interface {
 	Add(path string, handler http.Handler)
 
 	// Match checks if a request matches this router.
-	// If so, adds the route parameters to the request and returns the corresponding handler
+	// If so, adds the route parameters to the request context and returns the corresponding handler
 	// If route doesn't matches, the response is nil
 	Match(*http.Request) http.Handler
 }

@@ -9,19 +9,17 @@ import (
 
 // node represents each path part in a route and constructs a tree
 type node struct {
-	path        string
-	handler     http.Handler
-	parent      *node
-	children    []*node
-	childParams []*node
+	path     string
+	handler  http.Handler
+	parent   *node
+	children []*node
 }
 
 // rootNode is a helper function to initialize the root "/" node for any tree.
 func rootNode(route string, handler http.Handler) *node {
 	n := &node{
-		path:        "/",
-		children:    make([]*node, 0),
-		childParams: make([]*node, 0),
+		path:     "/",
+		children: make([]*node, 0),
 	}
 
 	n.add(route, handler)
@@ -45,21 +43,16 @@ func (n *node) add(route string, handler http.Handler) {
 
 			// Create child
 			ch := &node{
-				path:        p,
-				children:    make([]*node, 0),
-				childParams: make([]*node, 0),
-				parent:      nn,
+				path:     p,
+				children: make([]*node, 0),
+				parent:   nn,
 			}
 
 			// Add children
 			ch.add(strings.Join(parts[i+1:], "/"), handler)
 
-			// Save on route or param tree
-			if ch.path[0] == ':' {
-				nn.childParams = append(nn.childParams, ch)
-			} else {
-				nn.children = append(nn.children, ch)
-			}
+			// Save route
+			nn.children = append(nn.children, ch)
 
 			return
 		}
@@ -72,24 +65,27 @@ func (n *node) add(route string, handler http.Handler) {
 // walk moves through nodes for a given path until no further match is found.
 func (n *node) walk(route string) (*node, string) {
 	route = cleanupRoute(route)
-	parts := strings.Split(route, "/")
 
 	// Loop through route parts
-	for i, p := range parts {
+	for i, _ := range route {
+		if route[i] != '/' && i != len(route) {
+			continue
+		}
+
 		// Skip empty parts, usually the first
-		if p == "" {
+		if route[:i] == "" {
 			continue
 		}
 
 		// Stop at catch-all route
-		if p == "*" {
+		if route[:i] == "*" {
 			return n, route
 		}
 
 		// Look for a match on existing tree
 		for _, ch := range n.children {
-			if ch.path == p {
-				return ch.walk(strings.Join(parts[i+1:], "/"))
+			if ch.path == route[:i] {
+				return ch.walk(route[i+1:])
 			}
 		}
 	}
@@ -106,66 +102,93 @@ func (n *node) match(r *http.Request) http.Handler {
 		return nil
 	}
 
-	// Check if route is root route
-	if cleanupRoute(r.URL.EscapedPath()) == "/" {
+	if r.URL.Path == "/" || r.URL.Path == "" {
 		return n.handler
 	}
 
-	// Split parts
-	parts := strings.Split(cleanupRoute(r.URL.EscapedPath()), "/")
+	// Look for children match, skip first and last '/'
+	i := 0
+	for r.URL.Path[len(r.URL.Path)-1-i] == '/' {
+		i++
+	}
 
-	// Look for children match, skip first "/"
-	return n.matchChild(parts[1:], r)
+	return n.matchChild(r.URL.Path[1:len(r.URL.Path)-i], r)
 }
 
 // matchChild does the recursive work of matching the tree parts and try to find the correct path for a route.
-func (n *node) matchChild(parts []string, r *http.Request) http.Handler {
+func (n *node) matchChild(part string, r *http.Request) http.Handler {
 	// Invalid route parts
-	if parts == nil || len(parts) == 0 {
+	if part == "" {
 		return nil
 	}
 
-	// First look for exact match
-	for _, ch := range n.children {
-		if parts[0] == ch.path {
-			// Last one
-			if len(parts) == 1 {
+	// Remove trailing slashes
+	for len(part) > 0 && part[len(part)-1] == '/' {
+		n.matchChild(part[:len(part)-1], r)
+	}
+
+	// Split parts
+	for i, _ := range part {
+		if part[i] != '/' && len(part) != (i+1) {
+			continue
+		}
+
+		// Look for matches
+		for _, ch := range n.children {
+			// It's a parameter?
+			if ch.path[0] == ':' {
+				// Are we done?
+				if len(part) == (i + 1) {
+					// Set last param
+					*r = *r.WithContext(
+						context.WithValue(
+							r.Context(),
+							Param(ch.path[1:]),
+							part[:i+1]))
+
+					return ch.handler
+				} else {
+					// Go deeper
+					h := ch.matchChild(part[i+1:], r)
+					if h != nil {
+						// Set param
+						*r = *r.WithContext(
+							context.WithValue(
+								r.Context(),
+								Param(ch.path[1:]),
+								part[:i]))
+
+						return h
+					}
+				}
+			}
+
+			// Last route part
+			if len(part) == (i + 1) {
+				if part[:i+1] == ch.path {
+					return ch.handler
+				}
+			}
+
+			// Match current
+			if part[:i] == ch.path {
+				// Go deeper
+				h := ch.matchChild(part[i+1:], r)
+				if h != nil {
+					return h
+				}
+			}
+		}
+
+		// Check for catch-all routes.
+		for _, ch := range n.children {
+			if ch.path == "*" {
 				return ch.handler
 			}
-
-			// Go deeper
-			h := ch.matchChild(parts[1:], r)
-			if h != nil {
-				return h
-			}
-		}
-	}
-
-	// Now look for params match
-	for _, ch := range n.childParams {
-		*r = *r.WithContext(
-			context.WithValue(
-				r.Context(),
-				Param(strings.TrimPrefix(ch.path, ":")),
-				parts[0]))
-
-		// Last one
-		if len(parts) == 1 {
-			return ch.handler
 		}
 
-		// Go deeper
-		h := ch.matchChild(parts[1:], r)
-		if h != nil {
-			return h
-		}
-	}
-
-	// Check for catch-all routes.
-	for _, ch := range n.children {
-		if ch.path == "*" {
-			return ch.handler
-		}
+		// No match found so far
+		return nil
 	}
 
 	// No match found
@@ -176,14 +199,12 @@ func (n *node) matchChild(parts []string, r *http.Request) http.Handler {
 func cleanupRoute(route string) string {
 	// Ensure route starts with /
 	if route == "" || route[0] != '/' {
-		route = path.Join("/", route)
-	} else {
-		route = path.Clean(route)
+		route = "/" + route
 	}
 
 	// Remove trailing "/"
 	for len(route) > 1 && route[len(route)-1] == '/' {
-		route = strings.TrimSuffix(route, "/")
+		route = route[:len(route)-1]
 	}
 
 	return route

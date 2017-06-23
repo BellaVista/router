@@ -40,7 +40,7 @@ func TestDispatcherParam(t *testing.T) {
 
 	d.ServeHTTP(res, req)
 
-	if req.Context().Value(Param("name")).(string) != "joe" {
+	if GetString(req, "name") != "joe" {
 		t.Error("Request should have the :name context param set to 'joe' after dispatch")
 	}
 }
