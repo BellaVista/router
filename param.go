@@ -5,6 +5,13 @@ import (
 	"strconv"
 )
 
+type routeParamsKey struct{}
+
+type routeParams struct {
+	keys   []string
+	values []string
+}
+
 // Param type is used to add key values to http.Request's Context.
 type Param string
 

@@ -64,6 +64,7 @@ func BenchmarkMultiParamMatch(b *testing.B) {
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		r.Match(req)
