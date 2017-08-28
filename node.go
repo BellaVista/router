@@ -27,7 +27,7 @@ func rootNode(route string, handler http.Handler) *node {
 	return n
 }
 
-// add construct the children tree for the current node matching the route provided.
+// add constructs the children tree for the current node matching the route provided.
 // It sets the http.Handler to the final element.
 func (n *node) add(route string, handler http.Handler) {
 	// Lookup as far as possible

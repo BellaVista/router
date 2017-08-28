@@ -25,6 +25,20 @@ func BenchmarkRootMatch(b *testing.B) {
 
 	req, _ := http.NewRequest("GET", "http://test.com/", nil)
 
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.Match(req)
+	}
+}
+
+func BenchmarkPathMatch(b *testing.B) {
+	// Create route
+	r := New("/")
+	r.Add("/some/path/to/match", http.HandlerFunc(hello))
+
+	req, _ := http.NewRequest("GET", "http://test.com/some/path/to/match", nil)
+
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		r.Match(req)
 	}
@@ -37,6 +51,7 @@ func BenchmarkParamMatch(b *testing.B) {
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe", nil)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		r.Match(req)
 	}
@@ -49,6 +64,7 @@ func BenchmarkMultiParamMatch(b *testing.B) {
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		r.Match(req)
 	}
@@ -63,6 +79,7 @@ func BenchmarkRootDispatch(b *testing.B) {
 	req, _ := http.NewRequest("GET", "http://test.com", nil)
 	res := httptest.NewRecorder()
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		d.ServeHTTP(res, req)
 	}
