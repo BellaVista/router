@@ -15,7 +15,7 @@ func helloName(w http.ResponseWriter, r *http.Request) {
 }
 
 func helloNames(w http.ResponseWriter, r *http.Request) {
-	//w.Write([]byte("Hello " + GetString(r, "first-name") + GetString(r, "middle-name") + GetString(r, "last-name")))
+	w.Write([]byte("Hello " + GetString(r, "first-name") + GetString(r, "middle-name") + GetString(r, "last-name")))
 }
 
 func BenchmarkRootMatch(b *testing.B) {

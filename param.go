@@ -7,18 +7,21 @@ import (
 
 type routeParamsKey struct{}
 
-type routeParams struct {
-	keys   []string
-	values []string
-}
-
 // Param type is used to add key values to http.Request's Context.
-type Param string
+//type Param string
 
 // GetParam is a convenience function to retrieve a route param from the current request.
 // It just wraps req.Context().Value(Param(key))
 func GetParam(req *http.Request, key string) interface{} {
-	return req.Context().Value(Param(key))
+	params := req.Context().Value(routeParamsKey{})
+	if _, ok := params.(map[string]string); ok {
+		if _, ok := params.(map[string]string)[key]; ok {
+			return params.(map[string]string)[key]
+		}
+	}
+
+	// Fallback param not found
+	return nil
 }
 
 // GetString wraps GetParam and returns the value as a string type.

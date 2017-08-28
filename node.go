@@ -115,16 +115,24 @@ func (n *node) match(r *http.Request) http.Handler {
 	}
 
 	// Create parameters storage
-	params := routeParams{
-		keys:   make([]string, 0),
-		values: make([]string, 0),
+	params := make(map[string]string)
+
+	// Get handler
+	h := n.matchChild(r.URL.Path[1:len(r.URL.Path)-i], r, params)
+
+	// Set params if needed
+	if h != nil && len(params) > 0 {
+		*r = *r.WithContext(context.WithValue(
+			r.Context(),
+			routeParamsKey{},
+			params))
 	}
 
-	return n.matchChild(r.URL.Path[1:len(r.URL.Path)-i], r, &params)
+	return h
 }
 
 // matchChild does the recursive work of matching the tree parts and try to find the correct path for a route.
-func (n *node) matchChild(part string, r *http.Request, params *routeParams) http.Handler {
+func (n *node) matchChild(part string, r *http.Request, params map[string]string) http.Handler {
 	// Invalid route parts
 	if part == "" {
 		return nil
@@ -156,16 +164,13 @@ func (n *node) matchChild(part string, r *http.Request, params *routeParams) htt
 								part[:i+1]))
 					*/
 					// Set last param
-					params.keys = append(params.keys, ch.path[1:])
-					params.values = append(params.values, part[:i+1])
-
-					*r = *r.WithContext(context.WithValue(
-						r.Context(),
-						routeParamsKey{},
-						params))
+					params[ch.path[1:]] = part[:i+1]
 
 					return ch.handler
 				}
+
+				// Set param
+				params[ch.path[1:]] = part[:i]
 
 				// Go deeper
 				h := ch.matchChild(part[i+1:], r, params)
@@ -178,9 +183,6 @@ func (n *node) matchChild(part string, r *http.Request, params *routeParams) htt
 								Param(ch.path[1:]),
 								part[:i]))
 					*/
-					// Set params
-					params.keys = append(params.keys, ch.path[1:])
-					params.values = append(params.values, part[:i])
 
 					return h
 				}

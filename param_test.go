@@ -22,6 +22,23 @@ func TestGetParam(t *testing.T) {
 	}
 }
 
+func TestGetWrongParam(t *testing.T) {
+	r := New("/")
+	r.Add("/:param", http.HandlerFunc(paramHandler))
+
+	req, _ := http.NewRequest("GET", "http://example.com/value", nil)
+	h := r.Match(req)
+	if h == nil {
+		t.Fatalf("%s should have matched our routes", "http://example.com/value")
+	} else if GetParam(req, "invalid") != nil {
+		t.Errorf("Param :invalid should be set to 'nil'. Got %v", GetParam(req, "invalid"))
+	}
+
+	if GetString(req, "invalid") != "" {
+		t.Errorf("GetString for :invalid should have been ''. Got %s", GetString(req, "invalid"))
+	}
+}
+
 func TestGetString(t *testing.T) {
 	r := New("/")
 	r.Add("/:param", http.HandlerFunc(paramHandler))
