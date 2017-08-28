@@ -15,7 +15,7 @@ func helloName(w http.ResponseWriter, r *http.Request) {
 }
 
 func helloNames(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello " + GetString(r, "first-name") + GetString(r, "middle-name") + GetString(r, "last-name")))
+	//w.Write([]byte("Hello " + GetString(r, "first-name") + GetString(r, "middle-name") + GetString(r, "last-name")))
 }
 
 func BenchmarkRootMatch(b *testing.B) {
@@ -60,7 +60,7 @@ func BenchmarkParamMatch(b *testing.B) {
 func BenchmarkMultiParamMatch(b *testing.B) {
 	// Create route
 	r := New("/")
-	r.Add("/hello/:first-name/:middle-name/:last-name", http.HandlerFunc(helloName))
+	r.Add("/hello/:first-name/:middle-name/:last-name", http.HandlerFunc(helloNames))
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 
@@ -77,6 +77,36 @@ func BenchmarkRootDispatch(b *testing.B) {
 	d := Route(r)
 
 	req, _ := http.NewRequest("GET", "http://test.com", nil)
+	res := httptest.NewRecorder()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		d.ServeHTTP(res, req)
+	}
+}
+
+func BenchmarkParamDispatch(b *testing.B) {
+	// Create route
+	r := New("/")
+	r.Add("/hello/:name", http.HandlerFunc(helloName))
+	d := Route(r)
+
+	req, _ := http.NewRequest("GET", "http://test.com/hello/joe", nil)
+	res := httptest.NewRecorder()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		d.ServeHTTP(res, req)
+	}
+}
+
+func BenchmarkMultiParamDispatch(b *testing.B) {
+	// Create route
+	r := New("/")
+	r.Add("/hello/:first-name/:middle-name/:last-name", http.HandlerFunc(helloNames))
+	d := Route(r)
+
+	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 	res := httptest.NewRecorder()
 
 	b.ResetTimer()
