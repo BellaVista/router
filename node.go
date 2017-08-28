@@ -10,7 +10,6 @@ import (
 // node represents each path part in a route and constructs a tree
 type node struct {
 	path     string
-	fullPath string
 	handler  http.Handler
 	parent   *node
 	children []*node
@@ -48,7 +47,6 @@ func (n *node) add(route string, handler http.Handler) {
 				children: make([]*node, 0),
 				parent:   nn,
 			}
-			ch.fullPath = ch.buildPath()
 
 			// Add children
 			ch.add(strings.Join(parts[i+1:], "/"), handler)
@@ -155,14 +153,6 @@ func (n *node) matchChild(part string, r *http.Request, params map[string]string
 			if ch.path[0] == ':' {
 				// Are we done?
 				if len(part) == (i + 1) {
-					/*
-						// Set last param
-						*r = *r.WithContext(
-							context.WithValue(
-								r.Context(),
-								Param(ch.path[1:]),
-								part[:i+1]))
-					*/
 					// Set last param
 					params[ch.path[1:]] = part[:i+1]
 
@@ -175,15 +165,6 @@ func (n *node) matchChild(part string, r *http.Request, params map[string]string
 				// Go deeper
 				h := ch.matchChild(part[i+1:], r, params)
 				if h != nil {
-					/*
-						// Set param
-						*r = *r.WithContext(
-							context.WithValue(
-								r.Context(),
-								Param(ch.path[1:]),
-								part[:i]))
-					*/
-
 					return h
 				}
 			}
