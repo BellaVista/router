@@ -11,11 +11,11 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func helloName(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello " + GetString(r, "name")))
+	w.Write([]byte("Hello " + GetParam(r, "name")))
 }
 
 func helloNames(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello " + GetString(r, "first-name") + GetString(r, "middle-name") + GetString(r, "last-name")))
+	w.Write([]byte("Hello " + GetParam(r, "first-name") + GetParam(r, "middle-name") + GetParam(r, "last-name")))
 }
 
 func BenchmarkRootMatch(b *testing.B) {
