@@ -95,7 +95,7 @@ import (
 )
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello " + router.GetString(r, "name")))
+    w.Write([]byte("Hello " + router.GetParam(r, "name")))
 }
 
 func main() {
@@ -138,14 +138,10 @@ import (
 )
 
 func getUser(w http.ResponseWriter, r *http.Request) {
-    id, err := router.GetInt(r, "id")
-    if err != nil {
-        // There was an error obtaining an integer value from the :id route parameter
-        // ...
-    }
+    id := router.GetParam(r, "id")
     
-    // id now holds a value of type int received from the :id route parameter
-    //...
+    // Do something with that id
+    // ...
 }
 
 func main() {
@@ -162,16 +158,3 @@ func main() {
 }
 
 ```
-
-You can get the raw parameters, a parameter as a string, or other native types using the helper functions from the package. 
-
-Check the docs for: 
-
-- [GetParam](https://godoc.org/github.com/BellaVista/router#GetParam)
-- [GetString](https://godoc.org/github.com/BellaVista/router#GetParam)
-- [GetInt](https://godoc.org/github.com/BellaVista/router#GetInt)
-- [GetInt64](https://godoc.org/github.com/BellaVista/router#GetInt64)
-- [GetUint64](https://godoc.org/github.com/BellaVista/router#GetUint64)
-- [GetFloat64](https://godoc.org/github.com/BellaVista/router#GetFloat64)
-- [GetBool](https://godoc.org/github.com/BellaVista/router#GetBool)
-
