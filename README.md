@@ -38,7 +38,7 @@ func main() {
     
     s := &http.Server{
         Addr:           ":8080",
-        Handler:        router.Route(r),
+        Handler:        router.Build(r),
     }
     
     s.ListenAndServe()
@@ -111,7 +111,7 @@ func main() {
     // Create http.Server and dispatch both routers
     s := &http.Server{
         Addr:           ":8080",
-        Handler:        router.Route(r1, r2), // router.Route creates the dispatcher object 
+        Handler:        router.Build(r1, r2), // router.Build creates the dispatcher object 
     }
     
     s.ListenAndServe()
@@ -152,7 +152,7 @@ func main() {
     
     s := &http.Server{
         Addr:           ":8080",
-        Handler:        router.Route(r),
+        Handler:        router.Build(r),
     }
     
     s.ListenAndServe()

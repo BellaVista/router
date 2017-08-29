@@ -20,7 +20,7 @@ func TestDispatcher(t *testing.T) {
 	r2.Add("/test", http.HandlerFunc(dhandler))
 	r2.Add("/test/1/2/3/4/5/6", http.HandlerFunc(dhandler))
 
-	d := Route(r1, r2)
+	d := Build(r1, r2)
 
 	if len(d.(*dispatcher).routes) != 2 {
 		t.Errorf("Route should have added 2 routes to dispatcher. Got %d", len(d.(*dispatcher).routes))
@@ -33,7 +33,7 @@ func TestDispatcherParam(t *testing.T) {
 		res.Write([]byte("Hello " + GetParam(req, "name")))
 	}))
 
-	d := Route(r)
+	d := Build(r)
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "http://localhost/hello/joe", nil)
@@ -50,7 +50,7 @@ func TestConcurrentDispatch(t *testing.T) {
 	r.Add("/one/:param", http.HandlerFunc(dhandler))
 	r.Add("/two/:param", http.HandlerFunc(dhandler))
 
-	d := Route(r)
+	d := Build(r)
 
 	for i := 0; i < 1000; i++ {
 		res1 := httptest.NewRecorder()

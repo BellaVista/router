@@ -75,7 +75,7 @@ func BenchmarkRootDispatch(b *testing.B) {
 	// Create route
 	r := New("/")
 	r.Add("/", http.HandlerFunc(hello))
-	d := Route(r)
+	d := Build(r)
 
 	req, _ := http.NewRequest("GET", "http://test.com", nil)
 	res := httptest.NewRecorder()
@@ -90,7 +90,7 @@ func BenchmarkParamDispatch(b *testing.B) {
 	// Create route
 	r := New("/")
 	r.Add("/hello/:name", http.HandlerFunc(helloName))
-	d := Route(r)
+	d := Build(r)
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe", nil)
 	res := httptest.NewRecorder()
@@ -105,7 +105,7 @@ func BenchmarkMultiParamDispatch(b *testing.B) {
 	// Create route
 	r := New("/")
 	r.Add("/hello/:first-name/:middle-name/:last-name", http.HandlerFunc(helloNames))
-	d := Route(r)
+	d := Build(r)
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 	res := httptest.NewRecorder()

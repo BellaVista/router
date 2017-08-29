@@ -30,68 +30,63 @@ func rootNode(route string, handler http.Handler) *node {
 // add constructs the children tree for the current node matching the route provided.
 // It sets the http.Handler to the final element.
 func (n *node) add(route string, handler http.Handler) {
+	// Root and matches
+	if route == n.path || n.path == "*" {
+		n.handler = handler
+		return
+	}
+
+	// Remove starting and trailing "/"
+	for len(route) > 1 && route[0] == '/' {
+		route = route[1:]
+	}
+	for len(route) > 1 && route[len(route)-1] == '/' {
+		route = route[:len(route)-1]
+	}
+
 	// Lookup as far as possible
-	nn, remain := n.walk(route)
+	nn, remain := n.walk(strings.Split(route, "/"))
 
 	// Add pending parts if any and stop adding after catch-all
-	if nn.path != "*" {
-		parts := strings.Split(remain, "/")
-		for i, p := range parts {
-			if p == "" {
-				continue
-			}
-
+	if len(remain) > 0 {
+		if nn.path != "*" {
 			// Create child
 			ch := &node{
-				path:     p,
+				path:     remain[0],
 				children: make([]*node, 0),
 				parent:   nn,
 			}
 
-			// Add children
-			ch.add(strings.Join(parts[i+1:], "/"), handler)
+			// Go deeper
+			if len(remain) > 1 {
+				ch.add(strings.Join(remain[1:], "/"), handler)
+			} else {
+				ch.handler = handler
+			}
 
 			// Save route
 			nn.children = append(nn.children, ch)
-
 			return
 		}
 	}
-
-	// At last, set the handler
-	nn.handler = handler
 }
 
 // walk moves through nodes for a given path until no further match is found.
-func (n *node) walk(route string) (*node, string) {
-	route = cleanupRoute(route)
+func (n *node) walk(parts []string) (*node, []string) {
+	// End at empty
+	if len(parts) == 0 {
+		return n, parts
+	}
 
-	// Loop through route parts
-	for i := range route {
-		if route[i] != '/' && i != len(route) {
-			continue
-		}
-
-		// Skip empty parts, usually the first
-		if route[:i] == "" {
-			continue
-		}
-
-		// Stop at catch-all route
-		if route[:i] == "*" {
-			return n, route
-		}
-
-		// Look for a match on existing tree
-		for _, ch := range n.children {
-			if ch.path == route[:i] {
-				return ch.walk(route[i+1:])
-			}
+	// Search for first match in children
+	for _, ch := range n.children {
+		if parts[0] == ch.path {
+			return ch.walk(parts[1:])
 		}
 	}
 
 	// If no match, return current node and path
-	return n, route
+	return n, parts
 }
 
 // match searches for a matching route to the current request.

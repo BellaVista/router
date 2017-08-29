@@ -10,9 +10,9 @@ type Dispatcher interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 }
 
-// Route constructs a Dispatcher that implements http.Handler and will contain
+// Build constructs a Dispatcher that implements http.Handler and will contain
 // all routes defined in the Router objects passed as parameters.
-func Route(routes ...Router) Dispatcher {
+func Build(routes ...Router) Dispatcher {
 	d := &dispatcher{
 		routes: make([]Router, len(routes)),
 	}

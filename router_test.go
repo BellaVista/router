@@ -28,7 +28,7 @@ func TestRootMatch(t *testing.T) {
 }
 
 func TestRouteMatch(t *testing.T) {
-	r := New("/v1/")
+	r := New("/v1")
 	r.Add("/test", http.HandlerFunc(handler))
 	r.Add("/test/1/2/3/4/5/6", http.HandlerFunc(handler))
 
