@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -64,7 +65,6 @@ func BenchmarkMultiParamMatch(b *testing.B) {
 
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 
-	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		r.Match(req)
@@ -113,5 +113,15 @@ func BenchmarkMultiParamDispatch(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		d.ServeHTTP(res, req)
+	}
+}
+
+func BenchmarkGetParam(b *testing.B) {
+	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
+	req = req.WithContext(context.WithValue(req.Context(), routeParamsKey{}, map[string]string{"key": "value"}))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetParam(req, "key")
 	}
 }

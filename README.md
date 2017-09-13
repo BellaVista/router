@@ -22,13 +22,15 @@ The parameters are stored on the new Context object inside http.Request since Go
 ## Getting started
 
 ```go
+package main
+
 import (
     "github.com/bellavista/router"
     "net/http"
 )
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello " + router.GetString(r, "name")))
+    w.Write([]byte("Hello " + router.GetParam(r, "name")))
 }
 
 func main() {
@@ -153,6 +155,74 @@ func main() {
     s := &http.Server{
         Addr:           ":8080",
         Handler:        router.Build(r),
+    }
+    
+    s.ListenAndServe()
+}
+
+```
+
+
+## Middleware
+
+Middleware are just http.Handler objects, like your actual handlers, but you add them in order to the request flow while defining routes. 
+They can be added at Router level or globally at Dispatcher level: 
+
+
+```go
+
+import (
+    "context"
+    "github.com/bellavista/router"
+    "net/http"
+    
+    "fake/mockup/service/users"
+)
+
+// Middleware to set content type
+func mContentType(w http.ResponseWriter, r *http.Request) {
+    r.Header().Set("Content-Type", "text/plain")
+}
+
+type userKey struct{}
+
+// Middleware to set user object from :id param
+func mGetUser(w http.ResponseWriter, r *http.Request) {
+    id := router.GetParam(r, "id")
+    user := users.Get(id)
+    
+    // Include the context value in the request
+    *r = *r.WithContext(context.WithValue(
+            r.Context(),
+            userKey{},
+            user))
+}
+
+// Handler that shows the user obtained from the middleware
+func hShowUser(w http.ResponseWriter, r *http.Request) {
+    user := r.Context().Value(userKey{}).(users.User)
+    r.Write([]byte(user.Name))
+}
+
+func main() {
+    // Create route
+    r := router.New("/")
+    
+    // Add user middleware
+    r.AddBefore(http.HandlerFunc(mGetUser))
+    
+    // Route to handler
+    r.Add("/user/:id", http.HandlerFunc(hShowUser))
+    
+    // Get dispatcher
+    d := router.Build(r)
+    
+    // Add global middleware to set content type header
+    d.AddBefore(http.HandlerFunc(mContentType))
+    
+    s := &http.Server{
+        Addr:           ":8080",
+        Handler:        d,
     }
     
     s.ListenAndServe()

@@ -45,6 +45,56 @@ func TestDispatcherParam(t *testing.T) {
 	}
 }
 
+func TestMiddlewareFlow(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/", nil)
+
+	r := New("/")
+	r.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("2"))
+	}))
+
+	r.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("3"))
+	}))
+
+	r.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("4"))
+	}))
+
+	r.Add("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("Handler"))
+	}))
+
+	r.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("5"))
+	}))
+
+	r.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("6"))
+	}))
+
+	d := Build(r)
+
+	d.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("1"))
+	}))
+
+	d.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("7"))
+	}))
+
+	d.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("8"))
+	}))
+
+	d.ServeHTTP(w, req)
+
+	if w.Body.String() != "1234Handler5678" {
+		t.Errorf("Result body isn't as expected: ", w.Body.String())
+	}
+}
+
 func TestConcurrentDispatch(t *testing.T) {
 	r := New("/test")
 	r.Add("/one/:param", http.HandlerFunc(dhandler))

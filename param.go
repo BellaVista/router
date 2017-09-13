@@ -17,7 +17,6 @@ func GetParams(req *http.Request) map[string]string {
 }
 
 // GetParam is a convenience function to retrieve a route param from the current request.
-// It just wraps req.Context().Value(Param(key))
 func GetParam(req *http.Request, key string) string {
 	params := GetParams(req)
 	if params != nil {
