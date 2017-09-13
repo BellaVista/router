@@ -53,21 +53,21 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			d.runMiddleware(w, req, d.before)
 
 			// Dispatch
-			if req.Context().Err() == nil {
-				// Pre-route middleware
-				d.runMiddleware(w, req, r.Before())
+			//if req.Context().Err() == nil {
+			// Pre-route middleware
+			d.runMiddleware(w, req, r.Before())
 
-				// Check cancel
-				if req.Context().Err() != nil {
-					return
-				}
+			// Check cancel
+			//if req.Context().Err() != nil {
+			//	return
+			//}
 
-				// Handler dispatch
-				h.ServeHTTP(w, req)
+			// Handler dispatch
+			h.ServeHTTP(w, req)
 
-				// Post-route middleware
-				d.runMiddleware(w, req, r.After())
-			}
+			// Post-route middleware
+			d.runMiddleware(w, req, r.After())
+			//}
 
 			// Post-dispatch middleware
 			d.runMiddleware(w, req, d.after)
@@ -84,9 +84,9 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (d *dispatcher) runMiddleware(w http.ResponseWriter, req *http.Request, ms []http.Handler) {
 	for _, m := range ms {
 		// Stop at cancelled request context
-		if req.Context().Err() != nil {
-			return
-		}
+		//if req.Context().Err() != nil {
+		//return
+		//}
 
 		// Run middleware
 		m.ServeHTTP(w, req)
