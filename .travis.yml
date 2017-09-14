@@ -13,3 +13,7 @@ before_install:
 
 script:
       - $HOME/gopath/bin/goveralls -service=travis-ci
+language: go
+
+sudo: false
+
