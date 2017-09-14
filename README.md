@@ -165,9 +165,14 @@ func main() {
 
 ## Middleware
 
-Middleware are just http.Handler objects, like your actual handlers, but you add them in order to the request flow while defining routes. 
-They can be added at Router level or globally at Dispatcher level: 
+Middleware type is a function that takes an http.Handler object and returns another http.Handler object to be executed. 
+It has the following signature: 
 
+```go
+type Middleware func(http.Handler) http.Handler
+``` 
+
+It can be used to wrap handlers at handler level, router level and/or dispatcher level so different request flows can be architected:  
 
 ```go
 
