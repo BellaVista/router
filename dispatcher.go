@@ -13,20 +13,16 @@ type Dispatcher interface {
 	// Add inserts a Router to the end of the Dispatcher's queue
 	Add(r Router)
 
-	// AddBefore inserts new pre-dispatch middleware at Dispatcher level to be used by all routers.
-	AddBefore(u http.Handler)
-
-	// AddAfter inserts new post-dispatch middleware
-	AddAfter(u http.Handler)
+	// Wrap takes a Middleware to wrap all handlers in order (from inside out) at dispatcher level.
+	Wrap(Middleware)
 }
 
 // Build constructs a Dispatcher that implements http.Handler and will contain
 // all routes defined in the Router objects passed as parameters.
 func Build(routes ...Router) Dispatcher {
 	d := &dispatcher{
-		before: make([]http.Handler, 0),
-		routes: make([]Router, len(routes)),
-		after:  make([]http.Handler, 0),
+		routes:     make([]Router, len(routes)),
+		middleware: make([]Middleware, 0),
 	}
 
 	for i, r := range routes {
@@ -37,9 +33,8 @@ func Build(routes ...Router) Dispatcher {
 }
 
 type dispatcher struct {
-	before []http.Handler
-	routes []Router
-	after  []http.Handler
+	routes     []Router
+	middleware []Middleware
 }
 
 // ServeHTTP implements http.Handler interface.
@@ -49,28 +44,13 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, r := range d.routes {
 		// Found
 		if h := r.Match(req); h != nil {
-			// Pre-dispatch middleware
-			d.runMiddleware(w, req, d.before)
+			// Add middleware
+			for _, m := range d.middleware {
+				h = m(h)
+			}
 
 			// Dispatch
-			//if req.Context().Err() == nil {
-			// Pre-route middleware
-			d.runMiddleware(w, req, r.Before())
-
-			// Check cancel
-			//if req.Context().Err() != nil {
-			//	return
-			//}
-
-			// Handler dispatch
 			h.ServeHTTP(w, req)
-
-			// Post-route middleware
-			d.runMiddleware(w, req, r.After())
-			//}
-
-			// Post-dispatch middleware
-			d.runMiddleware(w, req, d.after)
 
 			// Return at route match
 			return
@@ -81,26 +61,10 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func (d *dispatcher) runMiddleware(w http.ResponseWriter, req *http.Request, ms []http.Handler) {
-	for _, m := range ms {
-		// Stop at cancelled request context
-		//if req.Context().Err() != nil {
-		//return
-		//}
-
-		// Run middleware
-		m.ServeHTTP(w, req)
-	}
-}
-
 func (d *dispatcher) Add(r Router) {
 	d.routes = append(d.routes, r)
 }
 
-func (d *dispatcher) AddBefore(m http.Handler) {
-	d.before = append(d.before, m)
-}
-
-func (d *dispatcher) AddAfter(m http.Handler) {
-	d.after = append(d.after, m)
+func (d *dispatcher) Wrap(m Middleware) {
+	d.middleware = append(d.middleware, m)
 }

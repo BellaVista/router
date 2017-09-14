@@ -50,48 +50,95 @@ func TestMiddlewareFlow(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", nil)
 
 	r := New("/")
-	r.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("2"))
+
+	r.Add("/", http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.Write([]byte("Handler"))
 	}))
 
-	r.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("3"))
-	}))
+	r.Wrap(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte("2"))
 
-	r.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("4"))
-	}))
+			next.ServeHTTP(res, req)
 
-	r.Add("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("Handler"))
-	}))
+			res.Write([]byte("3"))
+		})
+	})
 
-	r.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("5"))
-	}))
+	r.Wrap(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte("1"))
 
-	r.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("6"))
-	}))
+			next.ServeHTTP(res, req)
+
+			res.Write([]byte("4"))
+		})
+	})
 
 	d := Build(r)
 
-	d.AddBefore(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("1"))
-	}))
+	d.Wrap(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte("0"))
 
-	d.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("7"))
-	}))
+			next.ServeHTTP(res, req)
 
-	d.AddAfter(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("8"))
-	}))
+			res.Write([]byte("5"))
+		})
+	})
 
 	d.ServeHTTP(w, req)
 
-	if w.Body.String() != "1234Handler5678" {
-		t.Errorf("Result body isn't as expected: ", w.Body.String())
+	if w.Body.String() != "012Handler345" {
+		t.Errorf("Response body isn't as expected: %s", w.Body.String())
+	}
+}
+
+func TestMiddlewareCancel(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/", nil)
+
+	r := New("/")
+
+	r.Add("/", http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.Write([]byte("Handler"))
+	}))
+
+	r.Wrap(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte("2"))
+
+			next.ServeHTTP(res, req)
+
+			res.Write([]byte("3"))
+		})
+	})
+
+	r.Wrap(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte("1"))
+
+			// Cancel here for some reason...
+			return
+		})
+	})
+
+	d := Build(r)
+
+	d.Wrap(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte("0"))
+
+			next.ServeHTTP(res, req)
+
+			res.Write([]byte("5"))
+		})
+	})
+
+	d.ServeHTTP(w, req)
+
+	if w.Body.String() != "015" {
+		t.Errorf("Response body isn't as expected: %s", w.Body.String())
 	}
 }
 
