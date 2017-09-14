@@ -180,45 +180,33 @@ import (
 )
 
 // Middleware to set content type
-func mContentType(w http.ResponseWriter, r *http.Request) {
-    r.Header().Set("Content-Type", "text/plain")
+func mContentType(next http.Handler) http.Handler {
+    return func(w http.ResponseWriter, r *http.Request) {
+        // Set header
+        r.Header().Set("Content-Type", "text/plain")
+            
+        // Continue flow
+        next.ServeHTTP(w, r)
+    }
 }
 
-type userKey struct{}
-
-// Middleware to set user object from :id param
-func mGetUser(w http.ResponseWriter, r *http.Request) {
-    id := router.GetParam(r, "id")
-    user := users.Get(id)
-    
-    // Include the context value in the request
-    *r = *r.WithContext(context.WithValue(
-            r.Context(),
-            userKey{},
-            user))
-}
-
-// Handler that shows the user obtained from the middleware
-func hShowUser(w http.ResponseWriter, r *http.Request) {
-    user := r.Context().Value(userKey{}).(users.User)
-    r.Write([]byte(user.Name))
+// Handler that says hello
+func hSayHello(w http.ResponseWriter, r *http.Request) {
+    r.Write([]byte("Hello!"))
 }
 
 func main() {
     // Create route
     r := router.New("/")
     
-    // Add user middleware
-    r.AddBefore(http.HandlerFunc(mGetUser))
+    // Use middleware at router level
+    r.Wrap(http.HandlerFunc(mContentType))
     
     // Route to handler
-    r.Add("/user/:id", http.HandlerFunc(hShowUser))
+    r.Add("/hello", http.HandlerFunc(hSayHello))
     
     // Get dispatcher
     d := router.Build(r)
-    
-    // Add global middleware to set content type header
-    d.AddBefore(http.HandlerFunc(mContentType))
     
     s := &http.Server{
         Addr:           ":8080",
