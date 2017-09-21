@@ -148,9 +148,8 @@ func (n *node) matchChild(part string, r *http.Request, params map[string]string
 			if ch.path[0] == ':' {
 				// Are we done?
 				if len(part) == (i + 1) {
-					// Set last param
+					// Set last param and return
 					params[ch.path[1:]] = part[:i+1]
-
 					return ch.handler
 				}
 

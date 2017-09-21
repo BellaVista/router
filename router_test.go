@@ -77,42 +77,42 @@ func TestRouteParam(t *testing.T) {
 	h := r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value")
-	} else if GetParam(req, "test") != "value" {
-		t.Errorf("Param :test should be set to 'value'. Got %s", GetParam(req, "test"))
+	} else if Param(req, "test") != "value" {
+		t.Errorf("Param :test should be set to 'value'. Got %s", Param(req, "test"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/value/1", nil)
 	h = r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value/1")
-	} else if GetParam(req, "test") != "value" {
-		t.Errorf("Param :test should be set to 'value'. Got %s", GetParam(req, "test"))
+	} else if Param(req, "test") != "value" {
+		t.Errorf("Param :test should be set to 'value'. Got %s", Param(req, "test"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/value/1/2", nil)
 	h = r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value/1/2")
-	} else if GetParam(req, "test") != "value" {
-		t.Errorf("Param :test should be set to 'value'. Got %s", GetParam(req, "test"))
+	} else if Param(req, "test") != "value" {
+		t.Errorf("Param :test should be set to 'value'. Got %s", Param(req, "test"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/1/2/value", nil)
 	h = r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/1/2/value")
-	} else if GetParam(req, "param") != "value" {
-		t.Errorf("Param :param should be set to 'value'. Got %s", GetParam(req, "param"))
+	} else if Param(req, "param") != "value" {
+		t.Errorf("Param :param should be set to 'value'. Got %s", Param(req, "param"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/1/2/value1/3/4/value2", nil)
 	h = r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/1/2/value1/3/4/value2")
-	} else if GetParam(req, "param1") != "value1" {
-		t.Errorf("Param :param1 should be set to 'value1'. Got %s", GetParam(req, "param1"))
-	} else if GetParam(req, "param2") != "value2" {
-		t.Errorf("Param :param2 should be set to 'value2'. Got %s", GetParam(req, "param2"))
+	} else if Param(req, "param1") != "value1" {
+		t.Errorf("Param :param1 should be set to 'value1'. Got %s", Param(req, "param1"))
+	} else if Param(req, "param2") != "value2" {
+		t.Errorf("Param :param2 should be set to 'value2'. Got %s", Param(req, "param2"))
 	}
 
 	//dumpTree(r.(*router).tree, "")
@@ -129,24 +129,24 @@ func TestCatchAllRoute(t *testing.T) {
 	h := r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value")
-	} else if GetParam(req, "test") != "value" {
-		t.Errorf("Param :test should be set to 'value'. Got %s", GetParam(req, "test"))
+	} else if Param(req, "test") != "value" {
+		t.Errorf("Param :test should be set to 'value'. Got %s", Param(req, "test"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/value/1/something", nil)
 	h = r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value/1/something")
-	} else if GetParam(req, "test") != "value" {
-		t.Errorf("Param :test should be set to 'value'. Got %s", GetParam(req, "test"))
+	} else if Param(req, "test") != "value" {
+		t.Errorf("Param :test should be set to 'value'. Got %s", Param(req, "test"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/value/1/2/3/4/5/6/7/8/9/0", nil)
 	h = r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value/1/2/3/4/5/6/7/8/9/0")
-	} else if GetParam(req, "test") != "value" {
-		t.Errorf("Param :test should be set to 'value'. Got %s", GetParam(req, "test"))
+	} else if Param(req, "test") != "value" {
+		t.Errorf("Param :test should be set to 'value'. Got %s", Param(req, "test"))
 	}
 
 	req, _ = http.NewRequest("GET", "http://example.com/1/2/value", nil)

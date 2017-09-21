@@ -30,7 +30,7 @@ import (
 )
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello " + router.GetParam(r, "name")))
+    w.Write([]byte("Hello " + router.Param(r, "name")))
 }
 
 func main() {
@@ -98,7 +98,7 @@ import (
 )
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello " + router.GetParam(r, "name")))
+    w.Write([]byte("Hello " + router.Param(r, "name")))
 }
 
 func main() {
@@ -141,7 +141,7 @@ import (
 )
 
 func getUser(w http.ResponseWriter, r *http.Request) {
-    id := router.GetParam(r, "id")
+    id := router.Param(r, "id")
     
     // Do something with that id
     // ...

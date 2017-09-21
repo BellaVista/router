@@ -30,7 +30,7 @@ func TestDispatcher(t *testing.T) {
 func TestDispatcherParam(t *testing.T) {
 	r := New("/")
 	r.Add("/hello/:name", http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		res.Write([]byte("Hello " + GetParam(req, "name")))
+		res.Write([]byte("Hello " + Param(req, "name")))
 	}))
 
 	d := Build(r)
@@ -40,7 +40,7 @@ func TestDispatcherParam(t *testing.T) {
 
 	d.ServeHTTP(res, req)
 
-	if GetParam(req, "name") != "joe" {
+	if Param(req, "name") != "joe" {
 		t.Error("Request should have the :name context param set to 'joe' after dispatch")
 	}
 }

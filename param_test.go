@@ -9,7 +9,7 @@ func paramHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello test!"))
 }
 
-func TestGetParam(t *testing.T) {
+func TestParam(t *testing.T) {
 	r := New("/")
 	r.Add("/:param", http.HandlerFunc(paramHandler))
 
@@ -17,8 +17,8 @@ func TestGetParam(t *testing.T) {
 	h := r.Match(req)
 	if h == nil {
 		t.Errorf("%s should have matched our routes", "http://example.com/value")
-	} else if GetParam(req, "param") != "value" {
-		t.Errorf("Param :param should be set to 'value'. Got %s", GetParam(req, "param"))
+	} else if Param(req, "param") != "value" {
+		t.Errorf("Param :param should be set to 'value'. Got %s", Param(req, "param"))
 	}
 }
 
@@ -30,11 +30,11 @@ func TestGetWrongParam(t *testing.T) {
 	h := r.Match(req)
 	if h == nil {
 		t.Fatalf("%s should have matched our routes", "http://example.com/value")
-	} else if GetParam(req, "invalid") != "" {
-		t.Errorf("Param :invalid should be set to ''. Got %v", GetParam(req, "invalid"))
+	} else if Param(req, "invalid") != "" {
+		t.Errorf("Param :invalid should be set to ''. Got %v", Param(req, "invalid"))
 	}
 
-	if GetParam(req, "invalid") != "" {
-		t.Errorf("GetParam for :invalid should have been ''. Got %s", GetParam(req, "invalid"))
+	if Param(req, "invalid") != "" {
+		t.Errorf("Param for :invalid should have been ''. Got %s", Param(req, "invalid"))
 	}
 }

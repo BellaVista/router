@@ -12,11 +12,11 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func helloName(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello " + GetParam(r, "name")))
+	w.Write([]byte("Hello " + Param(r, "name")))
 }
 
 func helloNames(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello " + GetParam(r, "first-name") + GetParam(r, "middle-name") + GetParam(r, "last-name")))
+	w.Write([]byte("Hello " + Param(r, "first-name") + Param(r, "middle-name") + Param(r, "last-name")))
 }
 
 func BenchmarkRootMatch(b *testing.B) {
@@ -116,12 +116,12 @@ func BenchmarkMultiParamDispatch(b *testing.B) {
 	}
 }
 
-func BenchmarkGetParam(b *testing.B) {
+func BenchmarkParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
 	req = req.WithContext(context.WithValue(req.Context(), routeParamsKey{}, map[string]string{"key": "value"}))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		GetParam(req, "key")
+		Param(req, "key")
 	}
 }
