@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-chi/chi"
 )
 
 func hello(w http.ResponseWriter, r *http.Request) {
@@ -17,6 +19,14 @@ func helloName(w http.ResponseWriter, r *http.Request) {
 
 func helloNames(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello " + Param(r, "first-name") + Param(r, "middle-name") + Param(r, "last-name")))
+}
+
+func helloNameChi(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello " + chi.URLParam(r, "name")))
+}
+
+func helloNamesChi(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello " + chi.URLParam(r, "first-name") + chi.URLParam(r, "middle-name") + chi.URLParam(r, "last-name")))
 }
 
 func BenchmarkRootMatch(b *testing.B) {
@@ -86,6 +96,20 @@ func BenchmarkRootDispatch(b *testing.B) {
 	}
 }
 
+func BenchmarkChiRootDispatch(b *testing.B) {
+	// Create route
+	r := chi.NewRouter()
+	r.Get("/", hello)
+
+	req, _ := http.NewRequest("GET", "http://test.com/", nil)
+	res := httptest.NewRecorder()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.ServeHTTP(res, req)
+	}
+}
+
 func BenchmarkParamDispatch(b *testing.B) {
 	// Create route
 	r := New("/")
@@ -101,6 +125,20 @@ func BenchmarkParamDispatch(b *testing.B) {
 	}
 }
 
+func BenchmarkChiParamDispatch(b *testing.B) {
+	// Create route
+	r := chi.NewRouter()
+	r.Get("/hello/{name}", helloNameChi)
+
+	req, _ := http.NewRequest("GET", "http://test.com/hello/joe", nil)
+	res := httptest.NewRecorder()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.ServeHTTP(res, req)
+	}
+}
+
 func BenchmarkMultiParamDispatch(b *testing.B) {
 	// Create route
 	r := New("/")
@@ -113,6 +151,20 @@ func BenchmarkMultiParamDispatch(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		d.ServeHTTP(res, req)
+	}
+}
+
+func BenchmarkChiMultiParamDispatch(b *testing.B) {
+	// Create route
+	r := chi.NewRouter()
+	r.Get("/hello/{first-name}/{middle-name}/{last-name}", helloNamesChi)
+
+	req, _ := http.NewRequest("GET", "http://test.com/hello/joe/x/smith", nil)
+	res := httptest.NewRecorder()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.ServeHTTP(res, req)
 	}
 }
 

@@ -35,7 +35,7 @@ func TestAdd(t *testing.T) {
 func TestBuildPath(t *testing.T) {
 	root := rootNode("/", emptyHandler{})
 	if root.buildPath() != "/" {
-		t.Errorf("root.buildPath() should be '/'. Got &s", root.buildPath())
+		t.Errorf("root.buildPath() should be '/'. Got %s", root.buildPath())
 	}
 
 	root = rootNode("/test", emptyHandler{})

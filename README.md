@@ -180,19 +180,17 @@ import (
     "context"
     "github.com/bellavista/router"
     "net/http"
-    
-    "fake/mockup/service/users"
 )
 
 // Middleware to set content type
 func mContentType(next http.Handler) http.Handler {
-    return func(w http.ResponseWriter, r *http.Request) {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         // Set header
         r.Header().Set("Content-Type", "text/plain")
             
         // Continue flow
         next.ServeHTTP(w, r)
-    }
+    })
 }
 
 // Handler that says hello
@@ -205,7 +203,7 @@ func main() {
     r := router.New("/")
     
     // Use middleware at router level
-    r.Wrap(http.HandlerFunc(mContentType))
+    r.Wrap(mContentType)
     
     // Route to handler
     r.Add("/hello", http.HandlerFunc(hSayHello))
