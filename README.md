@@ -1,9 +1,9 @@
-[![GoDoc](https://godoc.org/github.com/bellavista/router?status.svg)](https://godoc.org/github.com/bellavista/router)
-[![Version](https://badge.fury.io/gh/bellavista%2Frouter.svg)](https://badge.fury.io/gh/bellavista%2Frouter)
+[![GoDoc](https://godoc.org/github.com/leonelquinteros/router?status.svg)](https://godoc.org/github.com/leonelquinteros/router)
+[![Version](https://badge.fury.io/gh/leonelquinteros%2Frouter.svg)](https://badge.fury.io/gh/leonelquinteros%2Frouter)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
-[![Build Status](https://travis-ci.org/BellaVista/router.svg?branch=master)](https://travis-ci.org/BellaVista/router)
-[![Coverage Status](https://coveralls.io/repos/github/BellaVista/router/badge.svg?branch=master)](https://coveralls.io/github/BellaVista/router?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/bellavista/router)](https://goreportcard.com/report/github.com/bellavista/router)
+[![Build Status](https://travis-ci.org/leonelquinteros/router.svg?branch=master)](https://travis-ci.org/leonelquinteros/router)
+[![Coverage Status](https://coveralls.io/repos/github/leonelquinteros/router/badge.svg?branch=master)](https://coveralls.io/github/leonelquinteros/router?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/leonelquinteros/router)](https://goreportcard.com/report/github.com/leonelquinteros/router)
 
 
 # Bella Vista Router
@@ -25,7 +25,7 @@ The parameters are stored on the new Context object inside http.Request since Go
 package main
 
 import (
-    "github.com/bellavista/router"
+    "github.com/leonelquinteros/router"
     "net/http"
 )
 
@@ -93,7 +93,7 @@ Then, multiple routers can join into a single dispatcher that acts as a replacem
 ```go
 
 import (
-    "github.com/bellavista/router"
+    "github.com/leonelquinteros/router"
     "net/http"
 )
 
@@ -136,7 +136,7 @@ So, if you want to receive a parameter called `id` at the end of your `/user` ro
 ```go
 
 import (
-    "github.com/bellavista/router"
+    "github.com/leonelquinteros/router"
     "net/http"
 )
 
@@ -178,7 +178,7 @@ It can be used to wrap handlers at handler level, router level and/or dispatcher
 
 import (
     "context"
-    "github.com/bellavista/router"
+    "github.com/leonelquinteros/router"
     "net/http"
 )
 
