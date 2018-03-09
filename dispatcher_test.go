@@ -15,12 +15,12 @@ func TestDispatcher(t *testing.T) {
 	r1 := New("/v1/")
 	r1.Add("/test", http.HandlerFunc(dhandler))
 	r1.Add("/test/1/2/3/4/5/6", http.HandlerFunc(dhandler))
+	d := Build(r1)
 
 	r2 := New("/v2")
 	r2.Add("/test", http.HandlerFunc(dhandler))
 	r2.Add("/test/1/2/3/4/5/6", http.HandlerFunc(dhandler))
-
-	d := Build(r1, r2)
+	d.Add(r2)
 
 	if len(d.(*dispatcher).routes) != 2 {
 		t.Errorf("Route should have added 2 routes to dispatcher. Got %d", len(d.(*dispatcher).routes))
@@ -37,11 +37,16 @@ func TestDispatcherParam(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "http://localhost/hello/joe", nil)
-
 	d.ServeHTTP(res, req)
-
 	if Param(req, "name") != "joe" {
 		t.Error("Request should have the :name context param set to 'joe' after dispatch")
+	}
+
+	res = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", "http://localhost/bye/joe", nil)
+	d.ServeHTTP(res, req)
+	if Param(req, "name") != "" {
+		t.Error("Request should have the :name context param empty after dispatch a 404 request")
 	}
 }
 
