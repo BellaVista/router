@@ -6,9 +6,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/leonelquinteros/router)](https://goreportcard.com/report/github.com/leonelquinteros/router)
 
 
-# Bella Vista Router
+# Router
 
-**Pure Go's stdlib, idiomatic, ultra-fast, simple, net/http compatible, context compatible, http router/mux**
+**Pure Go's stdlib, idiomatic, fast, simple, net/http compatible, context compatible, http router/mux**
 
 Your existent http.Handler works with NO CHANGES with this package. And now they can get route parameters!
 The parameters are stored on the new Context object inside http.Request since Go 1.7. 
