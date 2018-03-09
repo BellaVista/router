@@ -195,21 +195,6 @@ func (n *node) matchChild(part string, r *http.Request, params map[string]string
 	return nil
 }
 
-// cleanupRoute ensures proper routes definition formatting
-func cleanupRoute(route string) string {
-	// Ensure route starts with /
-	if route == "" || route[0] != '/' {
-		route = "/" + route
-	}
-
-	// Remove trailing "/"
-	for len(route) > 1 && route[len(route)-1] == '/' {
-		route = route[:len(route)-1]
-	}
-
-	return route
-}
-
 // buildPath returns a string representing the entire path
 // from the root to the current node.
 func (n *node) buildPath() string {
