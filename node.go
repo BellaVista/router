@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -101,17 +102,14 @@ func (n *node) match(r *http.Request) http.Handler {
 		return n.handler
 	}
 
-	// Look for children match, skip first and last '/'
-	i := 0
-	for r.URL.Path[len(r.URL.Path)-1-i] == '/' {
-		i++
-	}
-
 	// Create parameters storage
 	params := make(map[string]string)
 
+	// Cleanup path
+	r.URL.Path = filepath.Clean(r.URL.Path)
+
 	// Get handler
-	h := n.matchChild(r.URL.Path[1:len(r.URL.Path)-i], r, params)
+	h := n.matchChild(r.URL.Path[1:], r, params)
 
 	// Set params if needed
 	if h != nil && len(params) > 0 {
